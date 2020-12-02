@@ -1,9 +1,11 @@
+from __future__ import print_function
 import gym
 from gym import spaces
 from gym.utils import seeding
 import numpy as np
 import itertools
 
+TRADE_BENEFIT = 0
 
 class TradingEnv(gym.Env):
   """
@@ -20,27 +22,40 @@ class TradingEnv(gym.Env):
     - when buying, buy as many as cash in hand allows
     - if buying multiple stock, equally distribute cash in hand and then utilize the balance
   """
-  def __init__(self, train_data, init_invest=20000):
+  def __init__(self, train_data,train_data_rsi, init_invest=20000):
     # data
     self.stock_price_history = np.around(train_data) # round up to integer to reduce state space
     self.n_stock, self.n_step = self.stock_price_history.shape
+    self.stock_rsi_history=train_data_rsi
 
     # instance attributes
     self.init_invest = init_invest
     self.cur_step = None
     self.stock_owned = None
     self.stock_price = None
+    self.stock_rsi= None
     self.cash_in_hand = None
 
     # action space
     self.action_space = spaces.Discrete(3**self.n_stock)
 
     # observation space: give estimates in order to sample and build scaler
+    # print(self.stock_price_history)
     stock_max_price = self.stock_price_history.max(axis=1)
+    # print(stock_max_price)
+    # exit()
     stock_range = [[0, init_invest * 2 // mx] for mx in stock_max_price]
     price_range = [[0, mx] for mx in stock_max_price]
     cash_in_hand_range = [[0, init_invest * 2]]
-    self.observation_space = spaces.MultiDiscrete(stock_range + price_range + cash_in_hand_range)
+    rsi_range=[[0,100]]
+    # print(stock_range)
+    # print(price_range)
+    # print(cash_in_hand_range)
+    # print(stock_range + price_range + cash_in_hand_range)
+    # exit()
+    # self.observation_space = spaces.MultiDiscrete(stock_range + price_range + cash_in_hand_range)
+    self.observation_space = spaces.MultiDiscrete(rsi_range)
+
 
     # seed and start
     self._seed()
@@ -56,6 +71,7 @@ class TradingEnv(gym.Env):
     self.cur_step = 0
     self.stock_owned = [0] * self.n_stock
     self.stock_price = self.stock_price_history[:, self.cur_step]
+    self.stock_rsi = self.stock_rsi_history[:, self.cur_step]
     self.cash_in_hand = self.init_invest
     return self._get_obs()
 
@@ -64,10 +80,14 @@ class TradingEnv(gym.Env):
     assert self.action_space.contains(action)
     prev_val = self._get_val()
     self.cur_step += 1
-    self.stock_price = self.stock_price_history[:, self.cur_step] # update price
+    self.stock_price = self.stock_price_history[:, self.cur_step]    # update price
+    self.stock_rsi = self.stock_rsi_history[:, self.cur_step] # update rsi
     self._trade(action)
     cur_val = self._get_val()
     reward = cur_val - prev_val
+    if reward < 0:
+        reward = reward * 2
+    reward = reward + TRADE_BENEFIT
     done = self.cur_step == self.n_step - 1
     info = {'cur_val': cur_val}
     return self._get_obs(), reward, done, info
@@ -75,9 +95,10 @@ class TradingEnv(gym.Env):
 
   def _get_obs(self):
     obs = []
-    obs.extend(self.stock_owned)
-    obs.extend(list(self.stock_price))
-    obs.append(self.cash_in_hand)
+    obs.extend(self.stock_price)
+    # obs.extend(self.stock_owned)
+    # obs.extend(list(self.stock_rsi))
+    # obs.append(self.cash_in_hand)
     return obs
 
 
@@ -98,18 +119,31 @@ class TradingEnv(gym.Env):
         sell_index.append(i)
       elif a == 2:
         buy_index.append(i)
+    print('{},'.format(self.stock_owned[0]),end='')
+    print('{},'.format(self.cash_in_hand),end='')
+    print('{},'.format(self._get_val()),end='')  # net worth
 
+
+    TRADE_BENEFIT = -5
     # two passes: sell first, then buy; might be naive in real-world settings
     if sell_index:
       for i in sell_index:
-        self.cash_in_hand += self.stock_price[i] * self.stock_owned[i]
-        self.stock_owned[i] = 0
+        if self.stock_owned[i] > 0:
+            self.cash_in_hand += self.stock_price[i]
+            self.stock_owned[i] -= 1
+            TRADE_BENEFIT = 10
+        else:
+            TRADE_BENEFIT = -100
     if buy_index:
       can_buy = True
       while can_buy:
-        for i in buy_index:
+        # for i in buy_index:
           if self.cash_in_hand > self.stock_price[i]:
             self.stock_owned[i] += 1 # buy one share
             self.cash_in_hand -= self.stock_price[i]
+            can_buy=False
+            TRADE_BENEFIT = 10
           else:
+            TTRADE_BENEFIT = -100
             can_buy = False
+
