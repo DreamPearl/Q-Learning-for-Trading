@@ -53,8 +53,8 @@ class TradingEnv(gym.Env):
     # print(cash_in_hand_range)
     # print(stock_range + price_range + cash_in_hand_range)
     # exit()
-    # self.observation_space = spaces.MultiDiscrete(stock_range + price_range + cash_in_hand_range)
-    self.observation_space = spaces.MultiDiscrete(rsi_range)
+    self.observation_space = spaces.MultiDiscrete(stock_range + rsi_range + cash_in_hand_range)
+    # self.observation_space = spaces.MultiDiscrete(rsi_range)
 
 
     # seed and start
@@ -85,9 +85,9 @@ class TradingEnv(gym.Env):
     self._trade(action)
     cur_val = self._get_val()
     reward = cur_val - prev_val
-    if reward < 0:
-        reward = reward * 2
-    reward = reward + TRADE_BENEFIT
+    # if reward < 0:
+    #     reward = reward * 2
+    # reward = reward + TRADE_BENEFIT
     done = self.cur_step == self.n_step - 1
     info = {'cur_val': cur_val}
     return self._get_obs(), reward, done, info
@@ -95,10 +95,10 @@ class TradingEnv(gym.Env):
 
   def _get_obs(self):
     obs = []
-    obs.extend(self.stock_price)
-    # obs.extend(self.stock_owned)
-    # obs.extend(list(self.stock_rsi))
-    # obs.append(self.cash_in_hand)
+    # obs.extend(self.stock_price)
+    obs.extend(self.stock_owned)
+    obs.extend(list(self.stock_rsi))
+    obs.append(self.cash_in_hand)
     return obs
 
 
@@ -119,21 +119,21 @@ class TradingEnv(gym.Env):
         sell_index.append(i)
       elif a == 2:
         buy_index.append(i)
-    print('{},'.format(self.stock_owned[0]),end='')
-    print('{},'.format(self.cash_in_hand),end='')
+    # print('{},'.format(self.stock_owned[0]),end='')
+    # print('{},'.format(self.cash_in_hand),end='')
     print('{},'.format(self._get_val()),end='')  # net worth
 
 
-    TRADE_BENEFIT = -5
+    # TRADE_BENEFIT = -0.05
     # two passes: sell first, then buy; might be naive in real-world settings
     if sell_index:
       for i in sell_index:
         if self.stock_owned[i] > 0:
             self.cash_in_hand += self.stock_price[i]
             self.stock_owned[i] -= 1
-            TRADE_BENEFIT = 10
-        else:
-            TRADE_BENEFIT = -100
+            # TRADE_BENEFIT = 0.10
+        
+            # TRADE_BENEFIT = -200
     if buy_index:
       can_buy = True
       while can_buy:
@@ -142,8 +142,8 @@ class TradingEnv(gym.Env):
             self.stock_owned[i] += 1 # buy one share
             self.cash_in_hand -= self.stock_price[i]
             can_buy=False
-            TRADE_BENEFIT = 10
+            # TRADE_BENEFIT = 0.10
           else:
-            TTRADE_BENEFIT = -100
+            # TTRADE_BENEFIT = -200
             can_buy = False
 

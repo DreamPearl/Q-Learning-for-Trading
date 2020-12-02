@@ -39,12 +39,23 @@ if __name__ == '__main__':
   # print(data_rsi)
   # exit()
  
+  '''
+
+  WHAT IS THIS ???? WHAT IS DIFFERENT BETWEEN TRAIN AND TEST????
+
+
+  Can you please add Standard Scaler Again????
+
+
+
+
+  '''
   train_data = data[:, 3:600]
   train_data_rsi=data_rsi[:, 3:600]
   train_data_dates=data_date[:, 3:600]
-  test_data_dates = data_date[:, 3:600]
-  test_data = data[:, 3:600]
-  test_data_rsi=data_rsi[:, 3:600]
+  test_data_dates = data_date[:, 600:]
+  test_data = data[:, 600:]
+  test_data_rsi=data_rsi[:, 600:]
   # test_data_dates = data_date[:, 613:]
   # test_data = data[:, 613:]
   # test_data_rsi=data_rsi[:, 613:]
@@ -56,7 +67,7 @@ if __name__ == '__main__':
   # print("train_data")
   # print(train_data)
   # print(len(train_data_rsi[0]))
-  # exit()
+  # # exit()
   # print("test_data")
   # print(len(test_data_rsi[0]))
   # print(test_data_rsi)
@@ -71,7 +82,7 @@ if __name__ == '__main__':
   agent = DQNAgent(state_size, action_size,args.mode)
   scaler = get_scaler(env)
   # print("stock_owned,stock_rsi,cash_in_hand,stock_adj_price,qvalue1,qvalue2,qvalue3,random/smart_action,action")
-  print("state(stock_price),action,stock_owned,cash_in_hand,net_worth,accuracy,loss")
+  print("state(stock_owned),state(rsi),state(cash_in_hand),action,net_worth,accuracy,loss")
   portfolio_value = []
 
   if args.mode == 'test':
@@ -93,8 +104,8 @@ if __name__ == '__main__':
     # exit()
     # print(state)
     # print('{},{},{},'.format(state[0],state[1],state[2]))
-    # state = scaler.transform([state])  //          CHANGE
-    state=np.array([state])
+    state = scaler.transform([state])  
+    # state=np.array([state])
     # qvalue_current= agent.model.predict([state])
     # print(qvalue_current)
     # exit()
@@ -111,14 +122,14 @@ if __name__ == '__main__':
       # print('n_step {}'.format(time))
       # if e==99:
       # if args.mode == 'train' and (len(agent.memory)+1) > args.batch_size:
-      # before_transform_state = scaler.inverse_transform(state)
-      before_transform_state=state
+      before_transform_state = scaler.inverse_transform(state)
+      # before_transform_state=state
       # print(before_transform_state[0])
       # exit()
       qvalue_current= agent.model.predict(np.array(state))
       # print('current transform state is {},{},{},'.format(state[0][0],state[0][1],state[0][2]))
-      print('{},'.format(before_transform_state[0][0]),end='')
-      # print('{},'.format(env.stock_price[0]),end='')   //CHANGE
+      print('{},{},{},'.format(before_transform_state[0][0],before_transform_state[0][1],before_transform_state[0][2]),end='')
+      # print('{},'.format(env.stock_price[0]),end='')   
       # print('{},{},{},'.format(qvalue_current[0][0],qvalue_current[0][1],qvalue_current[0][2]),end='')
       # print('current transform state is {},{},{},'.format(state[0][0],state[0][1],state[0][2]))
       action = agent.act(state)
@@ -134,11 +145,11 @@ if __name__ == '__main__':
   
       next_state, reward, done, info = env.step(action)
       # print('{},{},{},'.format(next_state[0],next_state[1],next_state[2]))
-      # next_state = scaler.transform([next_state])    //CHANGE
-      next_state=np.array([next_state])
+      next_state = scaler.transform([next_state])    
+      # next_state=np.array([next_state])
       # print('next transform state is {},{},{},'.format(next_state[0][0],next_state[0][1],next_state[0][2]))
-      # before_transform_next_state = scaler.inverse_transform(next_state)   //CHANGE
-      before_transform_next_state=next_state
+      before_transform_next_state = scaler.inverse_transform(next_state)   
+      # before_transform_next_state=next_state
       if args.mode == 'train':
         agent.remember(state, action, reward, next_state, done)
         # print('next state is {},{},{},'.format(before_transform_next_state[0][0],before_transform_next_state[0][1],before_transform_next_state[0][2]))
@@ -157,10 +168,11 @@ if __name__ == '__main__':
         # print('episode {} step {}'.format(e,time))
 
         history=agent.replay(e,action,args.batch_size)
+      print()
     # print('end is {}'.format(env.cur_step))
     # exit()
     if args.mode == 'train' and (e + 1) % 10 == 0: 
-      # print("saving the weights file") # checkpoint weights
+      print("saving the weights file") # checkpoint weights
       agent.save('weights/{}-dqn.h5'.format(timestamp))
 
   # save portfolio value history to disk
