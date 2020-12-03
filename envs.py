@@ -40,23 +40,13 @@ class TradingEnv(gym.Env):
     self.action_space = spaces.Discrete(3**self.n_stock)
 
     # observation space: give estimates in order to sample and build scaler
-    # print(self.stock_price_history)
     stock_max_price = self.stock_price_history.max(axis=1)
-    # print(stock_max_price)
-    # exit()
     stock_range = [[0, init_invest * 2 // mx] for mx in stock_max_price]
     price_range = [[0, mx] for mx in stock_max_price]
     cash_in_hand_range = [[0, init_invest * 2]]
     rsi_range=[[0,100]]
-    # print(stock_range)
-    # print(price_range)
-    # print(cash_in_hand_range)
-    # print(stock_range + price_range + cash_in_hand_range)
-    # exit()
     self.observation_space = spaces.MultiDiscrete(stock_range + rsi_range + cash_in_hand_range)
-    # self.observation_space = spaces.MultiDiscrete(rsi_range)
-
-
+    
     # seed and start
     self._seed()
     self._reset()
@@ -119,8 +109,6 @@ class TradingEnv(gym.Env):
         sell_index.append(i)
       elif a == 2:
         buy_index.append(i)
-    # print('{},'.format(self.stock_owned[0]),end='')
-    # print('{},'.format(self.cash_in_hand),end='')
     print('{},'.format(self._get_val()),end='')  # net worth
 
 
