@@ -51,9 +51,9 @@ class DQNAgent(object):
     target_f[range(batch_size), actions] = target
     
     history=self.model.fit(states, target_f,validation_split=0.2, epochs=1, verbose=0)
-    print('{},'.format(history.history['acc'][0]),end='')
+    print('{},'.format(history.history['accuracy'][0]),end='')
     print('{},'.format(history.history['loss'][0]),end='')
-    print('{},'.format(history.history['val_acc'][0]),end='')
+    print('{},'.format(history.history['val_accuracy'][0]),end='')
     print(history.history['val_loss'][0],end='')
    
     if self.epsilon > self.epsilon_min:
