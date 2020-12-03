@@ -2,15 +2,12 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.optimizers import Adam
 from keras.layers.normalization import BatchNormalization
-# from keras.layers import LSTM
-
 
 
 def mlp(n_obs, n_action, n_hidden_layer=4, n_neuron_per_layer=100,
         activation='relu', loss='mse'):
   """ A multi-layer perceptron """
   model = Sequential()
-  # model.add(LSTM(60, input_dim=n_obs))
   model.add(Dense(200, input_dim=n_obs, activation=activation))
   model.add(BatchNormalization())
   model.add(Dropout(0.15))
