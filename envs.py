@@ -87,7 +87,7 @@ class TradingEnv(gym.Env):
     reward = cur_val - prev_val
     # if reward < 0:
     #     reward = reward * 2
-    # reward = reward + TRADE_BENEFIT
+    reward = reward + TRADE_BENEFIT
     done = self.cur_step == self.n_step - 1
     info = {'cur_val': cur_val}
     return self._get_obs(), reward, done, info
@@ -124,26 +124,27 @@ class TradingEnv(gym.Env):
     print('{},'.format(self._get_val()),end='')  # net worth
 
 
-    # TRADE_BENEFIT = -0.05
+    TRADE_BENEFIT = -0.5
     # two passes: sell first, then buy; might be naive in real-world settings
     if sell_index:
       for i in sell_index:
-        if self.stock_owned[i] > 0:
+        if self.stock_owned[i] >0:
             self.cash_in_hand += self.stock_price[i]
             self.stock_owned[i] -= 1
-            # TRADE_BENEFIT = 0.10
-        
-            # TRADE_BENEFIT = -200
+            TRADE_BENEFIT = 3000
+
+        else:
+            TRADE_BENEFIT = -2000
     if buy_index:
       can_buy = True
       while can_buy:
-        # for i in buy_index:
+        for i in buy_index:
           if self.cash_in_hand > self.stock_price[i]:
-            self.stock_owned[i] += 1 # buy one share
+            self.stock_owned[i] += 1  # buy one share
             self.cash_in_hand -= self.stock_price[i]
             can_buy=False
-            # TRADE_BENEFIT = 0.10
+            TRADE_BENEFIT = 3000
           else:
-            # TTRADE_BENEFIT = -200
+            TTRADE_BENEFIT = -2000
             can_buy = False
 

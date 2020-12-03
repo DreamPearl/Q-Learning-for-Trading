@@ -171,7 +171,7 @@ if __name__ == '__main__':
       print()
     # print('end is {}'.format(env.cur_step))
     # exit()
-    if args.mode == 'train' and (e + 1) % 10 == 0: 
+    if args.mode == 'train': # and (e + 1) % 10 == 0: 
       print("saving the weights file") # checkpoint weights
       agent.save('weights/{}-dqn.h5'.format(timestamp))
 

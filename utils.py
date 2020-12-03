@@ -25,8 +25,8 @@ def get_data_date(col='Trade_Date'):
 
 def get_scaler(env):
   """ Takes a env and returns a scaler for its observation space """
-  # low = [0] * (env.n_stock * 2 + 1)
-  low = [0] * (env.n_stock)
+  low = [0] * (env.n_stock * 2 + 1)
+  # low = [0] * (env.n_stock)
 
   high = []
   max_price = env.stock_price_history.max(axis=1)
@@ -40,16 +40,22 @@ def get_scaler(env):
   max_stock_owned = max_cash // min_price
   # print(max_stock_owned)
   # exit()
-  # for i in max_stock_owned:
-  #   high.append(i)
+  # need to check again for multiple companies later
+  for i in max_stock_owned:
+    high.append(i)
+  for i in max_rsi:
+    high.append(i)
+  # high.append(max_rsi[0])           #not for 2 company
   # for i in max_price:
   #   high.append(i)
-  # high.append(max_cash)
-  high.append(max_rsi[0])
+  high.append(max_cash)
+  
 
   scaler = StandardScaler()
-  # print(scaler, low, high)
   scaler.fit([low, high])
+  # print(scaler, low, high)
+  # exit()
+  
   # print([low, high])
   return scaler
 

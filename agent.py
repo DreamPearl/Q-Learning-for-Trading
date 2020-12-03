@@ -12,12 +12,12 @@ class DQNAgent(object):
     self.action_size = action_size
     self.memory = deque(maxlen=2000)
     self.mode=mode
-    self.gamma = 0.90  # discount rate
+    self.gamma = 0.95  # discount rate
     self.epsilon = 1.0  # exploration rate #original one
     # self.epsilon = 0.5  # exploration rate
     self.epsilon_min = 0.10 # asdadasds
     # self.epsilon_decay = 0.2
-    self.epsilon_decay = 0.998    #original one
+    self.epsilon_decay = 0.999    #original one
     self.model = mlp(state_size, action_size)
 
 
@@ -86,6 +86,8 @@ class DQNAgent(object):
     #   print('buy')
   
     # print('')
+    # print(states,target_f)
+    # exit()
     history=self.model.fit(states, target_f,validation_split=0.2, epochs=1, verbose=0)
     # print(history.history)
     print('{},'.format(history.history['acc'][0]),end='')
