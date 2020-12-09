@@ -4,18 +4,18 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 
 
-def get_data(col='Adj_Close'):
+def get_data(stkName,col='Adj_Close'):
   """ Returns a 3 x n_step array """
-  msft = pd.read_csv('data/MSFT_Stock.csv', usecols=[col])
+  msft = pd.read_csv('yahooData/weeklyTradeTest/' + stkName + '_Stock'+'.csv', usecols=[col])
 
   return np.array([msft[col].values[::]])
 
-def get_data2(col='RSI'):
-     msft2 = pd.read_csv('data/MSFT_Stock.csv', usecols=[col])
+def get_data2(stkName,col='RSI'):
+     msft2 = pd.read_csv('yahooData/weeklyTradeTest/' + stkName + '_Stock'+'.csv', usecols=[col])
      return np.array([msft2[col].values[::]])
 
-def get_data_date(col='Trade_Date'):
-     msft2 = pd.read_csv('data/MSFT_Stock.csv', usecols=[col])
+def get_data_date(stkName,col='Trade_Date'):
+     msft2 = pd.read_csv('yahooData/weeklyTradeTest/' + stkName + '_Stock'+'.csv', usecols=[col])
      return np.array([msft2[col].values[::]])
 
 def get_scaler(env):
