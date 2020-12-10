@@ -133,6 +133,6 @@ class TradingEnv(gym.Env):
             can_buy=False
             TRADE_BENEFIT = 3000
           else:
-            TTRADE_BENEFIT = -2000
+            TRADE_BENEFIT = -2000
             can_buy = False
 
